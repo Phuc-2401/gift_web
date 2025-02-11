@@ -7,8 +7,9 @@ export const login = async (email, password) => {
     });
     return response.data;
 };
-export const register = async (email, password, google2fa_code) => {
+export const register = async (name,email, password, google2fa_code) => {
     const response = await axiosInstance.post("/register", {
+      name,
       email,
       password,
       google2fa_code
@@ -22,6 +23,7 @@ export const getAuthQr = async (name, email, password) => {
       email,
       password,
     });
+    console.log(response.data);
     return response.data;
 
 };

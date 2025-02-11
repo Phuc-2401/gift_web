@@ -4,6 +4,7 @@
             <h1>Đăng Ký</h1>
             <v-form @submit.prevent="register">
                 <div class="register-input">
+                    <v-text-field class="input" v-model="name" label="Tên" type="text" dense outline></v-text-field>
                     <v-text-field class="input" v-model="email" label="Email" type="email" dense outline></v-text-field>
 
                     <v-text-field class="input" v-model="password" label="Mật khẩu" type="password" outline
@@ -18,18 +19,47 @@
                         ngay</router-link></div>
             </v-form>
         </div>
+        <v-dialog v-model="showQrDialog" max-width="500px">
+            <v-card>
+                <v-card-title class="headline">Quét mã QR</v-card-title>
+                <v-card-text>
+                    <div class="qr-code">
+                        <img :src="qrImage" alt="QR Code" />
+                    </div>
+                    <div class="input-fields">
+                        <v-text-field
+                            v-model="codes"
+                            label="Mã số"
+                            type="text"
+                            maxlength="6"
+                            class="code-input"
+                        ></v-text-field>
+                    </div>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" @click="verifyCode">Xác nhận</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
 <script>
-import { getAuthQr } from '@/api/auth_api';
+import { getAuthQr, register } from '@/api/auth_api';
+import QRCode from 'qrcode';
 export default {
     name: 'RegisterPage',
     data() {
         return {
+            name:'',
             email: '',
             password: '',
-            repassword: ''
+            repassword: '',
+            showQrDialog: false,
+            qrImage: '',
+            google2faSecret: '',
+            codes: ''
         }
     }, methods: {
         async register() {
@@ -39,12 +69,33 @@ export default {
                 return;
             }
             try {
-                const respose = await getAuthQr(this.email, this.password);
-                if (respose.status === 200) {
-                    this.$toast.success('Đăng ký thành công');
+                const response = await getAuthQr(this.name,this.email, this.password);
+                if (response.status === 200) {
+                    this.google2faSecret = response.google2fa_secret;
+                    QRCode.toDataURL(response.qr_image, (err, url) => {
+                        if (err) {
+                            console.error(err);
+                            this.$toast.error('Không thể tạo mã QR');
+                        } else {
+                            this.qrImage = url;
+                            console.log(this.qrImage);
+                            this.showQrDialog = true;
+                        }
+                    });
                 }
             } catch (err) {
                 this.$toast.error('Đăng ký thất bại');
+            }
+        },
+        async verifyCode() {
+            try {
+                const response = await register(this.name,this.email, this.password, this.codes);
+                if (response.status === 200) {
+                    this.$toast.success('Đăng ký thành công');
+                    this.showQrDialog = false;
+                }
+            } catch (err) {
+                this.$toast.error('Mã xác thực không chính xác');
             }
         }
     }
@@ -102,5 +153,19 @@ h1 {
     border: #DD5D5D 1px solid;
     font-weight: 500;
     transition: background-color 0.5s ease, color 0.5s ease;
+}
+.qr-code {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-fields {
+    display: flex;
+    justify-content: space-between;
+}
+
+.code-input {
+    width: 40px;
+    text-align: center;
 }
 </style>
