@@ -2,7 +2,7 @@
     <div class="login-page">
         <div class="login-form">
             <h1>Đăng Nhập</h1>
-            <v-form>
+            <v-form @submit.prevent="handleLogin">
                 <div class="login-input">
                     <v-text-field class="input" v-model="email" label="Email" type="email" dense outline></v-text-field>
 
@@ -18,12 +18,25 @@
 </template>
 
 <script>
+import { login } from '@/api/auth_api';
 export default {
     name: 'LoginPage',
     data() {
         return {
             email: '',
             password: ''
+        }
+    },
+    methods: {
+        async handleLogin() {
+            try {
+                const response = await login(this.email, this.password);
+                if (response.status === 200) {
+                    this.$toast.success('Đăng nhập thành công');
+                }
+            }catch (err) {
+                this.$toast.error('Tài khoản hoặc mật khẩu không chính xác');
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
     <div class="register-page">
         <div class="register-form">
             <h1>Đăng Ký</h1>
-            <v-form>
+            <v-form @submit.prevent="register">
                 <div class="register-input">
                     <v-text-field class="input" v-model="email" label="Email" type="email" dense outline></v-text-field>
 
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { getAuthQr } from '@/api/auth_api';
 export default {
     name: 'RegisterPage',
     data() {
@@ -29,6 +30,22 @@ export default {
             email: '',
             password: '',
             repassword: ''
+        }
+    }, methods: {
+        async register() {
+            console.log('gọi đến register');
+            if (this.password !== this.repassword) {
+                this.$toast.error('Mật khẩu không khớp');
+                return;
+            }
+            try {
+                const respose = await getAuthQr(this.email, this.password);
+                if (respose.status === 200) {
+                    this.$toast.success('Đăng ký thành công');
+                }
+            } catch (err) {
+                this.$toast.error('Đăng ký thất bại');
+            }
         }
     }
 }

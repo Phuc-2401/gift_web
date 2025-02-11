@@ -14,8 +14,11 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "core-js": "^3.6.5",
+    "js-cookie": "^3.0.5",
     "vue": "^2.6.11",
+    "vue-qrcode-reader": "^5.7.0",
     "vue-router": "^3.6.5",
+    "vue-toastification": "^1.7.14",
     "vuetify": "^2.7.2"
   },
   "devDependencies": {
