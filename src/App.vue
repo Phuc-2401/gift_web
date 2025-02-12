@@ -1,7 +1,7 @@
 <template>
   <div id="app" data-app>
     <div>
-      <Navbar />
+      <Navbar v-if="showNavbar" />
     </div>
     <div class="app-container">
       <router-view />
@@ -19,6 +19,16 @@ export default {
     Footer,
   },
   name: "AppVue",
+  computed: {
+    showNavbar() {
+      const path = this.$route.path;
+      return (
+        path !== "/login" &&
+        path !== "/register" 
+      );
+    },
+   
+  },
 };
 </script>
 <style>

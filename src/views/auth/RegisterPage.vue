@@ -47,35 +47,12 @@
         </div>
       </v-form>
     </div>
-    <v-dialog v-model="showQrDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="headline">Quét mã QR</v-card-title>
-        <v-card-text>
-          <div class="qr-code">
-            <img :src="qrImage" alt="QR Code" />
-          </div>
-          <div class="input-fields">
-            <v-text-field
-              v-model="codes"
-              label="Mã số"
-              type="text"
-              maxlength="6"
-              class="code-input"
-            ></v-text-field>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="verifyCode">Xác nhận</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  
   </div>
 </template>
 
 <script>
-import { getAuthQr, register } from "@/api/auth_api";
-import QRCode from "qrcode";
+import { register } from "@/api/auth_api";
 export default {
   name: "RegisterPage",
   data() {
@@ -84,10 +61,7 @@ export default {
       email: "",
       password: "",
       repassword: "",
-      showQrDialog: false,
-      qrImage: "",
-      codes: "",
-      google2fa_secret: "",
+ 
     };
   },
   methods: {
@@ -97,49 +71,18 @@ export default {
         return;
       }
       try {
-        const response = await getAuthQr(this.name, this.email, this.password);
-        if (response.status === 200) {
-          this.google2fa_secret = response.google2fa_secret;
-          QRCode.toDataURL(response.qr_image, (err, url) => {
-            if (err) {
-              console.error(err);
-              this.$toast.error("Không thể tạo mã QR");
-            } else {
-              this.qrImage = url;
-              console.log(this.qrImage);
-              this.showQrDialog = true;
-            }
-          });
-        }
-      } catch (err) {
-        this.$toast.error(err.response.data.message);
-      }
-    },
-    async verifyCode() {
-      var data = {
-        name: this.name,
-        email: this.email,
-        password: this.password,
-        codes: this.codes,
-      };
-      console.log(data);
-      try {
-        const response = await register(
-          this.name,
-          this.email,
-          this.password,
-          this.codes,
-          this.google2fa_secret
-        );
+        const response = await register(this.name, this.email, this.password);
         if (response.status === 200) {
           this.$toast.success("Đăng ký thành công");
-          this.showQrDialog = false;
           this.$router.push("/login");
+        }else{
+          this.$toast.error("Đăng ký thất bại");
         }
       } catch (err) {
         this.$toast.error(err.response.data.message);
       }
     },
+   
   },
 };
 </script>
